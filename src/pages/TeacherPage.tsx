@@ -44,28 +44,39 @@ export default function TeacherDashboard() {
   };
 
   return (
-    <div className="flex justify-center mt-12">
-      <Card className="w-full max-w-lg p-4">
+    <div className="flex min-h-svh items-center justify-center bg-gradient-to-b from-background via-background to-muted px-4 py-10">
+      <Card className="w-full max-w-xl border border-border/70 shadow-xl shadow-primary/10">
         <CardHeader>
-          <CardTitle className="text-xl font-bold">Teacher Dashboard</CardTitle>
-          <CardDescription>Create & manage lessons</CardDescription>
+          <CardTitle className="text-2xl font-semibold tracking-tight">
+            Teacher dashboard
+          </CardTitle>
+          <CardDescription>
+            Create a new live lesson and share it with your students.
+          </CardDescription>
         </CardHeader>
 
-        <Separator className="my-4" />
+        <Separator className="my-2" />
 
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-2">
-              <Label>Lesson Name</Label>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Lesson name</Label>
               <Input
-                placeholder="Enter lesson name..."
+                placeholder="Intro to English conversation"
                 value={lessonName}
                 onChange={(e) => setLessonName(e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">
+                Pick something your students will immediately recognize.
+              </p>
             </div>
 
-            <Button className="w-full" onClick={handleCreateLesson}>
-              {mutation.isPending ? "Creating..." : "Create Lesson"}
+            <Button
+              className="w-full rounded-full py-2 text-base font-semibold shadow-md shadow-primary/30"
+              onClick={handleCreateLesson}
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? "Creating lesson…" : "Create lesson"}
             </Button>
           </div>
         </CardContent>

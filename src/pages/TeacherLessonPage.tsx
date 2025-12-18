@@ -16,6 +16,9 @@ import { float32ToPCM16, PCMPlayer } from "@/audio/pcm";
 import { toast } from "sonner";
 import CopyLessonLink from "@/components/CopyLessonLink";
 import type { Message } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const TeacherLessonPage = () => {
   //lesson id
@@ -30,6 +33,7 @@ const TeacherLessonPage = () => {
     }[]
   >([]);
   const [text, setText] = useState("");
+  const [showShare, setShowShare] = useState(true);
 
   const streamRef = useRef<MediaStream | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -65,6 +69,8 @@ const TeacherLessonPage = () => {
 
     socket.on("voice:audio", (msg) => {
       console.log(msg);
+      if (msg.senderId === teacherId) return;
+      console.log(msg);
       if (!msg.audio || !playerRef.current) return;
 
       // 🔥 reset queue if speaker changed
@@ -72,8 +78,6 @@ const TeacherLessonPage = () => {
         playerRef.current.reset();
         lastSpeakerRef.current = msg.senderId;
       }
-
-      if (msg.senderId === teacherId) return;
       playerRef.current.playChunk(msg.audio);
     });
 
@@ -166,80 +170,257 @@ const TeacherLessonPage = () => {
 
   console.log(data);
 
-  if (!id) return <h1>No Lesson ID available</h1>;
-  if (isLoading) return <h1>Loading lesson...</h1>;
-  if (error) return <h1>Failed to load lesson</h1>;
+  if (!id)
+    return (
+      <div className="flex min-h-svh items-center justify-center px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-lg">No lesson selected</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              We could not find a lesson ID in the URL. Please go back and
+              create or choose a lesson again.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+
+  if (isLoading)
+    return (
+      <div className="flex min-h-svh items-center justify-center px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-lg">Loading lesson…</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Fetching lesson details and chat history.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex min-h-svh items-center justify-center px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-lg text-destructive">
+              Failed to load lesson
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Something went wrong while loading the lesson. Please try again.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
 
   return (
-    <div className="p-6">
-      <h3 className="text-3xl font-bold">Teacher Page</h3>
-      <h1 className="text-2xl font-semibold">{data?.name}</h1>
-      <CopyLessonLink lessonId={id} />
-      <img src={data.qr} alt="qr code" />
-
-      <Select value={language} onValueChange={(value) => setLanguage(value)}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select Language" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="en">English</SelectItem>
-          <SelectItem value="nl">Dutch</SelectItem>
-          <SelectItem value="uk">Ukrainian</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <div>
-        <div className="border p-3 h-60 overflow-auto">
-          {data.chatMessages.map((m: Message, i: number) => (
-            <div key={i} className="mb-2 flex items-center justify-between">
-              <b>
-                {m.senderId}:{m.content}
-              </b>
-              <p className="text-xs text-gray-500 italic ml-6">
-                {new Date(m.createdAt).toLocaleString()}
-              </p>
-            </div>
-          ))}
-          {messages.map((m, i) => (
-            <div key={i} className="mb-2 flex justify-between items-center">
-              <div>
-                <b>{m.senderId}:</b> {m.translated}
-                <p className="text-xs text-gray-500 italic ml-6">
-                  Original: {m.original}
-                </p>
-              </div>
-              <p className="text-xs text-gray-500 italic ml-6">
-                {new Date(m.createdAt).toLocaleString()}
-              </p>
-            </div>
-          ))}
+    <div className="flex min-h-svh flex-col gap-6 bg-background px-4 py-6 lg:px-8">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h3 className="text-2xl font-semibold tracking-tight">
+            Teacher view
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Control your lesson, share access with students, and follow the live
+            translation.
+          </p>
+          <p className="mt-2 text-lg font-medium">{data?.name}</p>
         </div>
 
-        <input
-          className="border p-2 mt-2"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Write a message..."
-        />
-        <button
-          className="ml-2 p-2 bg-blue-500 text-white"
-          onClick={sendMessage}
-        >
-          Send
-        </button>
+        <div className="flex flex-col gap-3">
+          <Card className="w-full max-w-sm lg:w-[400px]">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                Select Language
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Select
+                value={language}
+                onValueChange={(value) => setLanguage(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="nl">Dutch</SelectItem>
+                  <SelectItem value="uk">Ukrainian</SelectItem>
+                  <SelectItem value="fr">French</SelectItem>
+                  <SelectItem value="de">German</SelectItem>
+                  <SelectItem value="es">Spanish</SelectItem>
+                  <SelectItem value="it">Italian</SelectItem>
+                  <SelectItem value="pt">Portuguese</SelectItem>
+                  <SelectItem value="ru">Russian</SelectItem>
+                  <SelectItem value="ja">Japanese</SelectItem>
+                  <SelectItem value="ko">Korean</SelectItem>
+                  <SelectItem value="zh">Chinese (Simplified)</SelectItem>
+                  <SelectItem value="ar">Arabic</SelectItem>
+                  <SelectItem value="hi">Hindi</SelectItem>
+                  <SelectItem value="sv">Swedish</SelectItem>
+                  <SelectItem value="pl">Polish</SelectItem>
+                  <SelectItem value="tr">Turkish</SelectItem>
+                  <SelectItem value="fi">Finnish</SelectItem>
+                  <SelectItem value="no">Norwegian</SelectItem>
+                  <SelectItem value="da">Danish</SelectItem>
+                  <SelectItem value="cs">Czech</SelectItem>
+                  <SelectItem value="ro">Romanian</SelectItem>
+                  <SelectItem value="el">Greek</SelectItem>
+                  <SelectItem value="he">Hebrew</SelectItem>
+                  <SelectItem value="th">Thai</SelectItem>
+                  <SelectItem value="id">Indonesian</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+          <Card className="w-full max-w-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                Student access
+              </CardTitle>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowShare((prev) => !prev)}
+              >
+                {showShare ? "Hide" : "Show"}
+              </Button>
+            </CardHeader>
+            {showShare && (
+              <CardContent className="space-y-3">
+                <CopyLessonLink lessonId={id} />
+                <div className="overflow-hidden rounded-md border bg-muted/40 p-2">
+                  <img
+                    src={data.qr}
+                    alt="qr code"
+                    className="mx-auto h-40 w-40 object-contain"
+                  />
+                </div>
+              </CardContent>
+            )}
+          </Card>
+        </div>
       </div>
 
-      {/* 🎤 VOICE CONTROLS */}
-      <div className="mt-4">
-        {!recording ? (
-          <button className="p-2 bg-green-500 text-white" onClick={startVoice}>
-            Start Voice Translation
-          </button>
-        ) : (
-          <button className="p-2 bg-red-500 text-white" onClick={stopVoice}>
-            Stop Voice Translation
-          </button>
-        )}
+      <div className="grid flex-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        {/* Voice controls */}
+        <Card className="order-2 h-fit lg:order-1">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">
+              Voice translation
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Start speaking and the system will automatically stream and
+              translate your voice for all participants.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              {!recording ? (
+                <Button
+                  size="lg"
+                  className="rounded-full px-6 py-2 text-base font-semibold shadow-md shadow-primary/30"
+                  onClick={startVoice}
+                >
+                  <span className="mr-2 inline-flex size-3 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
+                  Start speaking
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  variant="destructive"
+                  className="rounded-full px-6 py-2 text-base font-semibold shadow-md shadow-destructive/30"
+                  onClick={stopVoice}
+                >
+                  <span className="mr-2 inline-flex size-3 rounded-full bg-red-400 shadow-[0_0_12px_rgba(248,113,113,0.8)]" />
+                  Stop speaking
+                </Button>
+              )}
+              <span className="text-xs text-muted-foreground">
+                {recording
+                  ? "Microphone is live and streaming audio."
+                  : "Click to start streaming your voice."}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Chat */}
+        <Card className="order-1 flex min-h-[60vh] flex-col lg:order-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Live chat</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col gap-3">
+            <div className="flex-1 overflow-auto rounded-md border bg-muted/30 p-3">
+              {data.chatMessages.map((m: Message, i: number) => (
+                <div
+                  key={i}
+                  className="mb-2 flex items-start justify-between gap-3 text-sm"
+                >
+                  <div>
+                    <p className="font-medium">
+                      <span className="mr-1 text-xs font-semibold text-muted-foreground">
+                        {m.senderId}
+                      </span>
+                      {m.content}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-xs italic text-muted-foreground">
+                    {new Date(m.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+              {messages.map((m, i) => (
+                <div
+                  key={i}
+                  className="mb-2 flex items-start justify-between gap-3 text-sm"
+                >
+                  <div>
+                    <p className="font-medium">
+                      <span className="mr-1 text-xs font-semibold text-muted-foreground">
+                        {m.senderId}
+                      </span>
+                      {m.translated}
+                    </p>
+                    <p className="mt-0.5 text-xs italic text-muted-foreground">
+                      Original: {m.original}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-xs italic text-muted-foreground">
+                    {new Date(m.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <form
+              className="flex flex-col gap-2 sm:flex-row"
+              onSubmit={(e) => {
+                e.preventDefault();
+                sendMessage();
+              }}
+            >
+              <Input
+                className="flex-1"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Write a message…"
+              />
+              <Button type="submit" className="sm:w-auto">
+                Send
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

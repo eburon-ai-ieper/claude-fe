@@ -8,6 +8,11 @@ import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 import TeacherPage from "./pages/TeacherPage.tsx";
 import LessonPage from "./pages/LessonPage.tsx";
 import TeacherLessonPage from "./pages/TeacherLessonPage.tsx";
+import SuperAdminLayout from "./components/superadmin/Layout.tsx";
+import DashboardPage from "./pages/superadmin/DashboardPage.tsx";
+import UsersPage from "./pages/superadmin/UsersPage.tsx";
+import OrganizationsPage from "./pages/superadmin/OrganizationsPage.tsx";
+import SettingsPage from "./pages/superadmin/SettingsPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -19,10 +24,17 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/" element={<App />} />
 
         <Route
-          path="/super-admin"
+          path="/super-admin/*"
           element={
             <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
-              <h1>SuperAdmin</h1>
+              <SuperAdminLayout>
+                <Routes>
+                  <Route index element={<DashboardPage />} />
+                  <Route path="users" element={<UsersPage />} />
+                  <Route path="organizations" element={<OrganizationsPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                </Routes>
+              </SuperAdminLayout>
             </ProtectedRoute>
           }
         />
