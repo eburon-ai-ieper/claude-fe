@@ -13,7 +13,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 interface LocalSettings {
@@ -30,17 +30,6 @@ export function SettingsPage() {
     maxUsersPerOrganization: 1000,
     maintenanceMode: false,
   });
-
-  useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    try {
-      const parsed = JSON.parse(raw) as LocalSettings;
-      setSettings(parsed);
-    } catch {
-      // ignore parse error and keep defaults
-    }
-  }, []);
 
   const handleSave = (event: React.FormEvent) => {
     event.preventDefault();
@@ -90,7 +79,6 @@ export function SettingsPage() {
                   <FieldError
                     errors={[
                       {
-                        type: "min",
                         message: "Duration must be greater than 0",
                       },
                     ]}
@@ -110,8 +98,7 @@ export function SettingsPage() {
                   onChange={(event) =>
                     setSettings((prev) => ({
                       ...prev,
-                      maxUsersPerOrganization:
-                        Number(event.target.value) || 0,
+                      maxUsersPerOrganization: Number(event.target.value) || 0,
                     }))
                   }
                 />
@@ -119,7 +106,6 @@ export function SettingsPage() {
                   <FieldError
                     errors={[
                       {
-                        type: "min",
                         message: "Max users must be greater than 0",
                       },
                     ]}
@@ -166,5 +152,3 @@ export function SettingsPage() {
 }
 
 export default SettingsPage;
-
-

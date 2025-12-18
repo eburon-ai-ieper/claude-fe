@@ -63,7 +63,7 @@ export function UsersPage() {
   const adminList = useMemo(() => admins ?? [], [admins]);
   const organizationList: Organization[] = useMemo(
     () => organizations ?? [],
-    [organizations],
+    [organizations]
   );
 
   const createAdminMutation = useMutation({
@@ -204,9 +204,7 @@ export function UsersPage() {
           </CardHeader>
           <CardContent>
             {adminsError && (
-              <p className="text-sm text-destructive">
-                Failed to load admins.
-              </p>
+              <p className="text-sm text-destructive">Failed to load admins.</p>
             )}
             {!adminsLoading && adminList.length === 0 && !adminsError && (
               <p className="text-sm text-muted-foreground">
@@ -267,9 +265,7 @@ export function UsersPage() {
                 <Button
                   type="button"
                   size="sm"
-                  variant={
-                    mode === "create-admin" ? "secondary" : "ghost"
-                  }
+                  variant={mode === "create-admin" ? "secondary" : "ghost"}
                   className="h-7 px-2"
                   onClick={() => {
                     resetForm();
@@ -281,9 +277,7 @@ export function UsersPage() {
                 <Button
                   type="button"
                   size="sm"
-                  variant={
-                    mode === "create-owner" ? "secondary" : "ghost"
-                  }
+                  variant={mode === "create-owner" ? "secondary" : "ghost"}
                   className="h-7 px-2"
                   onClick={() => {
                     resetForm();
@@ -310,7 +304,6 @@ export function UsersPage() {
                     <FieldError
                       errors={[
                         {
-                          type: "required",
                           message: "Name is required",
                         },
                       ]}
@@ -332,7 +325,6 @@ export function UsersPage() {
                     <FieldError
                       errors={[
                         {
-                          type: "required",
                           message: "Email is required",
                         },
                       ]}
@@ -354,7 +346,6 @@ export function UsersPage() {
                       <FieldError
                         errors={[
                           {
-                            type: "required",
                             message: "Password is required",
                           },
                         ]}
@@ -366,9 +357,8 @@ export function UsersPage() {
                 <Field>
                   <FieldLabel htmlFor="user-org">Organization</FieldLabel>
                   <Select
-                    id="user-org"
                     value={organizationId}
-                    onChange={(event) => setOrganizationId(event.target.value)}
+                    onValueChange={(value) => setOrganizationId(value)}
                   >
                     <option value="">Select organization</option>
                     {organizationList.map((org) => (
@@ -381,7 +371,6 @@ export function UsersPage() {
                     <FieldError
                       errors={[
                         {
-                          type: "required",
                           message: "Organization is required",
                         },
                       ]}
@@ -391,7 +380,6 @@ export function UsersPage() {
                     <FieldError
                       errors={[
                         {
-                          type: "fetch",
                           message: "Failed to load organizations",
                         },
                       ]}
@@ -402,11 +390,7 @@ export function UsersPage() {
 
               <CardFooter className="flex justify-end gap-2 px-0">
                 {editingUser && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={resetForm}
-                  >
+                  <Button type="button" variant="ghost" onClick={resetForm}>
                     Cancel
                   </Button>
                 )}
@@ -433,5 +417,3 @@ export function UsersPage() {
 }
 
 export default UsersPage;
-
-

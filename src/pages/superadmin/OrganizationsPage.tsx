@@ -159,13 +159,11 @@ export function OrganizationsPage() {
                   <div>
                     <p className="text-sm font-medium">{org.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {org.users?.length ?? 0} users ·{" "}
-                      {org.rooms?.length ?? 0} rooms
+                      {org.users?.length ?? 0} users · {org.rooms?.length ?? 0}{" "}
+                      rooms
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {getSyntheticMinutesForOrganization(
-                        org,
-                      ).toLocaleString()}{" "}
+                      {getSyntheticMinutesForOrganization(org).toLocaleString()}{" "}
                       minutes used
                     </p>
                   </div>
@@ -216,7 +214,6 @@ export function OrganizationsPage() {
                     <FieldError
                       errors={[
                         {
-                          type: "required",
                           message: "Name is required",
                         },
                       ]}
@@ -236,7 +233,9 @@ export function OrganizationsPage() {
                 )}
                 <Button
                   type="submit"
-                  disabled={createMutation.isPending || updateMutation.isPending}
+                  disabled={
+                    createMutation.isPending || updateMutation.isPending
+                  }
                 >
                   <Plus className="mr-2 size-4" />
                   {editingOrg ? "Save changes" : "Create organization"}
@@ -251,5 +250,3 @@ export function OrganizationsPage() {
 }
 
 export default OrganizationsPage;
-
-
